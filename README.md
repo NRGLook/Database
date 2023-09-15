@@ -129,4 +129,5 @@
     - Связи:
       - **Автор**: Связь с пользователем, который написал статью, через Many-to-One связь (foreign key).
 ## 5. Схема:
+![DB1](https://github.com//NRGLook/Database/blob/main/DB1.png)
 
