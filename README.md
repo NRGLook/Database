@@ -48,9 +48,9 @@
 1. **Пользователь (Users)**
    - Поля:
      - Идентификатор (ID): integer, primary key, auto-increment.
-     - Имя (Username): varchar(255).
+     - Имя (Username): varchar(255), NOT NULL.
      - Электронная почта (Email): varchar(255).
-     - Пароль (Password): varchar(255), хешированный пароль.
+     - Пароль (Password): varchar(255), хешированный пароль, NOT NULL.
    - Связь:
      - У пользователя может быть одна роль (One-to-One).
      - У пользователя может быть один банк (One-to-One).
@@ -59,24 +59,24 @@
 2. **Роль (Roles)**
    - Поля:
      - Идентификатор (ID): integer, primary key, auto-increment.
-     - Название (Name): varchar(255).
+     - Название (Name): varchar(255), NOT NULL.
    - Связь:
      - У пользователя может быть одна роль (One-to-One).
 3. **Банк пользователя - прогресс (UserBank)**
    - Поля:
      - Идентификатор (ID): integer, primary key, auto-increment.
      - Идентификатор пользователя (User ID): integer, foreign key (связь с таблицей Users).
-     - Сумма (Amount): decimal.
+     - Сумма (Amount): decimal, NOT NULL.
    - Связь:
      - Каждый банк прогресса принадлежит определенному пользователю (One-to-One).
 4. **Задача (Tasks)**
    - Поля:
      - Идентификатор (ID): integer, primary key, auto-increment.
-     - Заголовок (Title): varchar(255).
+     - Заголовок - название задачи (Title): varchar(255), NOT NULL.
      - Описание (Description): text.
      - Приоритет (Priority): tinyint.
      - Категория (Category): varchar(255), foreign key (связь с таблицей TaskCategory).
-     - Время выполнения (Due Date): дата и время (datetime - timestamp).
+     - Время выполнения (Due Date): дата и время - будет создаваться сразу после добавления задачи(datetime - timestamp), NOT NULL.
    - Связь:
      - Каждая задача связана с определенной категорией задачи (One-to-One).
      - Каждая задача имеет связь с прогрессом выполнения (One-to-One).
@@ -84,16 +84,16 @@
 5. **Категория задачи (TaskCategory)**
    - Поля:
      - Идентификатор (ID): integer, primary key, auto-increment.
-     - Название (Name): varchar(255).
+     - Название (Name): varchar(255), NOT NULL.
    - Связь:
      - Категории задач связаны с задачами - одна задача может иметь неск категорий (Many-to-One)
 6. **Прогресс задачи (UserProgress)**
    - Поля:
      - Идентификатор (ID): integer, primary key, auto-increment.
      - Идентификатор задачи (Task ID): integer, foreign key (связь с таблицей Tasks).
-     - Прогресс (Progress): integer.
-     - Время начала (Start Time): дата и время (datetime - timestamp).
-     - Время завершения (End Time): дата и время (datetime - timestamp).
+     - Прогресс задачи (Progress): integer, NOT NULL.
+     - Время начала (Start Time): дата и время - тоже будет добавляться автоматически (datetime - timestamp), NOT NULL.
+     - Время завершения (End Time): дата и время - тоже будет добавляться автоматически (datetime - timestamp), NOT NULL.
    - Связь:
      - Каждая запись о прогрессе выполнения связана с определенной задачей (One-to-One).
 7. **Статья - Впечатление за день (Articles)**
@@ -101,20 +101,20 @@
      - Идентификатор (ID): integer, primary key, auto-increment.
      - Идентификатор пользователя (User ID): integer, foreign key (связь с таблицей Users).
      - Текст статьи (Content): text.
-     - Дата создания (Creation Date): дата и время (datetime - timestamp).
+     - Дата создания (Creation Date): дата и время (datetime - timestamp), NOT NULL.
    - Связь:
      - Каждая статья связана с определенным пользователем (One-to-One).
 8. **Достижения (Achievements)**
    - Поля:
      - Идентификатор (ID): integer, primary key, auto-increment.
-     - Название (Name): varchar(255).
+     - Название (Name): varchar(255), NOT NULL.
      - Описание (Description): text.
    - Связь:
      - Достижения могут быть заработаны пользователями - у одного пользователя может быть неск достижений (например, выполнено 10 задач за день, выполнено за такое-то время и т.д.) (Many-to-One).
 9. **Магазин (Store)**
      - Поля:
        - Идентификатор (ID): integer, primary key, auto-increment.
-       - Название (Name): varchar(255).
+       - Название (Name): varchar(255), NOT NULL.
        - Описание (Description): text.
        - Цена (Price): float-decimal.
      - Связь:
@@ -122,11 +122,11 @@
 10. **Товар (Products)**
     - Поля:
         - Идентификатор (ID): integer, primary key, auto-increment.
-        - Название (Name): varchar(255).
+        - Название (Name): varchar(255), NOT NULL.
         - Описание (Description): text.
-        - Цена (Price): float - decimal.
+        - Цена (Price): float - decimal, NOT NULL.
         - Изображение (Image): string - путь к изображению товара.
-        - Доступность (Availability): boolean.
+        - Доступность (Availability): boolean, NOT NULL.
     - Связь:
         - Товары связаны с магазином (One-to-One).
         
