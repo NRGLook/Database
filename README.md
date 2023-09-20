@@ -59,7 +59,7 @@
 2. **Роль (Roles)**
    - Поля:
      - Идентификатор (ID): integer, primary key, auto-increment.
-     - Название (Name): varchar(255), NOT NULL.
+     - Название (Role_Name): varchar(50), unique, NOT NULL.
    - Связь:
      - У пользователя может быть одна роль (One-to-One).
 3. **Банк пользователя - прогресс (UserBank)**
