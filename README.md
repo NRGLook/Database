@@ -48,8 +48,8 @@
 1. **Пользователь (Users)**
    - Поля:
      - Идентификатор (ID): integer, primary key, auto-increment.
-     - Имя (Username): varchar(255), NOT NULL.
-     - Электронная почта (Email): varchar(255).
+     - Имя (Username): varchar(50), unique,  NOT NULL.
+     - Электронная почта (Email): varchar(255), unique.
      - Пароль (Password): varchar(255), хешированный пароль, NOT NULL.
    - Связь:
      - У пользователя может быть одна роль (One-to-One).
