@@ -66,7 +66,7 @@
    - Поля:
      - Идентификатор (ID): integer, primary key, auto-increment.
      - Идентификатор пользователя (User ID): integer, foreign key (связь с таблицей Users).
-     - Сумма (Amount): decimal, NOT NULL.
+     - Сумма - прогресс пользователя, будет отображаться в виде числа (Amount): decimal, NOT NULL.
    - Связь:
      - Каждый банк прогресса принадлежит определенному пользователю (One-to-One).
 4. **Задача (Tasks)**
