@@ -131,5 +131,4 @@
         - Товары связаны с магазином (One-to-One).
         
 ## 5. Схема:
-![DB1](https://github.com/NRGLook/Database/blob/main/DB1.png)
-
+![image](https://github.com/NRGLook/Database/assets/91383841/2b757749-eb10-40d2-abd6-e5fc39eac25d)
