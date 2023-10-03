@@ -145,4 +145,4 @@
         - Товары связаны с магазином - в 1 магазине может быть неск товаров (Many-to-One).
         
 ## 5. Схема:
-![image](https://github.com/NRGLook/Database/assets/91383841/6b5522cb-df95-4899-a3cd-0b8e52d931e3)
+![image](https://github.com/NRGLook/Database/assets/91383841/22012df7-e4b3-48c3-be6f-bbb36a289f06)
