@@ -1,5 +1,5 @@
 # Database
-### Link to lab docs: https://docs.google.com/document/d/1Yo60ZA0qfhenD5T32Wp54au4XtYh9eQlsAPaJeyDQxc/edit#heading=h.xbw9xlus1a0
+### Link to lab docs: [...](https://docs.google.com/document/d/1Yo60ZA0qfhenD5T32Wp54au4XtYh9eQlsAPaJeyDQxc/edit#heading=h.xbw9xlus1a0)
 
 ## 1. Описание проекта:
 * **Название проекта**: Приложение по саморазвитию для достижения целей.
