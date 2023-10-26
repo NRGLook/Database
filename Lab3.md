@@ -1,4 +1,4 @@
-## 1.Разработать физическую модель базы данных (создать БД на вашем устройстве) + 2.Наложить на базу данных ограничения:
+## 1.Разработать физическую модель базы данных (создать БД на вашем устройстве)  2.Наложить на базу данных ограничения:
 
 ~~~
 CREATE TABLE public."users"
@@ -123,6 +123,7 @@ CREATE TABLE public."purchase_history"
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
 )
+
 CREATE TABLE public."roles"
 (
     id bigint NOT NULL,
@@ -229,30 +230,34 @@ INSERT INTO public."tasks" (id, title, description, due_date, "check", progress,
 
 ~~~
 INSERT (добавление данных):
-
 -- Пример INSERT запроса для добавления нового пользователя
 INSERT INTO public."users" (id, username, email, password)
 VALUES (4, 'user4', 'user4@example.com', 'password4');
 
 SELECT (извлечение данных):
-
 -- Пример SELECT запроса для получения списка всех пользователей
 SELECT * FROM public."users";
 
-UPDATE (обновление данных):
-
--- Пример UPDATE запроса для изменения имени пользователя с id=1
-UPDATE public."users" SET username = 'updated_user' WHERE id = 1;
-
 DELETE (удаление данных):
-
 -- Пример DELETE запроса для удаления пользователя с id=2
 DELETE FROM public."users" WHERE id = 2;
 
 CREATE INDEX:
-
 -- Создание индекса на столбце "username" в таблице "users"
 CREATE INDEX idx_username ON public."users" (username);
+
+UPDATE (Обновление данных):
+-- Обновление пароля пользователя с определенным идентификатором (например, 1):
+UPDATE public."users"
+SET password = 'новый_пароль'
+WHERE id = 1;
+-- Установка значения "progress" в 50 для задачи с определенным идентификатором (например, 1):
+UPDATE public."tasks"
+SET progress = 50
+WHERE id = 1;
+-- Увеличение всех цен на продукты на 10%:
+UPDATE public."products"
+SET price = price * 1.10;
 ~~~
 
 ## 5.УСЛОЖНЕННЫЕ ЗАПРОСЫ:
@@ -285,9 +290,15 @@ SELECT * FROM public."achievments" ORDER BY id DESC;
 Использование FETCH FIRST для выбора первых N строк:
 SELECT * FROM public."reviews" FETCH FIRST 5 ROWS ONLY;
 
-Использование JOIN для объединения таблиц и выбора данных:
-SELECT users.username, products.title
-FROM public."l_products_users"
-INNER JOIN public."users" ON l_products_users.users_id = users.id
-INNER JOIN public."products" ON l_products_users.products_id = products.id;
+ALTER (Изменение структуры таблицы):
+-- Добавление новой колонки "birthdate" в таблицу "users":
+ALTER TABLE public."users"
+ADD COLUMN birthdate date;
+-- Удаление колонки "styles" из таблицы "achievments":
+ALTER TABLE public."achievments"
+DROP COLUMN styles;
+
+AGGREGATE (Агрегатные функции):
+-- Вычисление среднего значения цен на продукты:
+SELECT AVG(price) FROM public."products";
 ~~~
