@@ -60,16 +60,7 @@ FROM public."posts"
 WHERE id IN (SELECT post_id FROM public."comments" GROUP BY post_id HAVING COUNT(id) > 1);
 ```
 
-3. Получить список пользователей, у которых есть хотя бы один ачивмент, а также список ачивментов, которые они получили:
-
-```sql
-SELECT u.username, a.achievment_name
-FROM public."users" u
-WHERE u.id IN (SELECT users_id FROM public."l_achievments_users")
-AND u.id = a.id;
-```
-
-4. Найти сумму всех покупок для каждого пользователя:
+3. Найти сумму всех покупок для каждого пользователя:
 
 ```sql
 SELECT username, (
@@ -80,7 +71,7 @@ SELECT username, (
 FROM public."users" u;
 ```
 
-5. Получить список задач (tasks) пользователя "user1", которые просрочены на данный момент:
+4. Получить список задач (tasks) пользователя "user1", которые просрочены на данный момент:
 
 ```sql
 SELECT title, description, due_date
