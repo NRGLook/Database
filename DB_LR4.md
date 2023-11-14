@@ -2,35 +2,35 @@
 
 ### Запросы с несколькими условиями:
 
-1. Получить список пользователей (users), у которых есть роль "Role 1" и купленные продукты (products) дороже 150 единиц:
+1. Получить список пользователей (users), у которых есть роль "Admin" и купленные продукты (products) дороже 150 единиц:
 
 ```sql
-SELECT u.username, u.email, p.title AS product_title, p.price
-FROM public."users" u, public."roles" r, public."l_products_users" pu, public."products" p
-WHERE u.id = r.user_id AND r.role_name = 'Role 1'
-  AND u.id = pu.users_id AND pu.products_id = p.id
-  AND p.price > 150;
+SELECT username, email, title AS product_title, price
+FROM users, roles, l_products_users, products
+WHERE users.id = roles.user_id AND roles.role_name = 'Admin'
+AND users.id = l_products_users.users_id AND l_products_users.products_id = products.id
+AND products.price > 150;
 ```
 
 2. Получить список пользователей (users), у которых количество задач (tasks) больше 2 и они просрочены:
 
 ```sql
-SELECT u.username, COUNT(t.id) AS task_count
-FROM public."users" u, public."tasks" t
-WHERE u.id = t.user_id AND t.due_date < NOW()
-GROUP BY u.username
-HAVING COUNT(t.id) > 2;
+SELECT users.username, COUNT(tasks.id) AS task_count
+FROM users, tasks 
+WHERE  users.id = tasks.user_id AND  tasks.due_date < NOW()
+GROUP BY users.username
+HAVING COUNT(tasks.id) > 2;
 ```
 
 ### Запросы с вложенными конструкциями:
 
-1. Получить список пользователей (users) и их задач (tasks), где каждая задача связана с меткой (label), у которой приоритет (priority) равен "High":
+1. Получить список пользователей (users) и их задач (tasks), где каждая задача связана с меткой (label), у которой категория задачи равна "Category A":
 
 ```sql
-SELECT u.username, t.title AS task_title, l.category AS task_category
-FROM public."users" u, public."tasks" t, public."labels" l
-WHERE u.id = t.user_id AND t.category_id = l.id
-  AND l.priority = 'High';
+SELECT users.username, tasks.title AS task_title, labels.category AS task_category
+FROM users, tasks, labels 
+WHERE users.id = tasks.user_id AND tasks.category_id = labels.id
+AND labels.category = 'Category A';
 ```
 
 2. Получить список пользователей (users), у которых есть хотя бы один ачивмент (achievments), и для каждого ачивмента указать количество пользователей, которые его получили:
