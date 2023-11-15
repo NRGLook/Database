@@ -22,6 +22,24 @@ GROUP BY users.username
 HAVING COUNT(tasks.id) > 2;
 ```
 
+3. Запрос, который выводит статистику по количеству задач для каждого пользователя и категории.
+```sql
+CREATE VIEW user_task_stats_category AS 
+WITH user_task_stats AS (
+    SELECT u.username, l.category, COUNT(*) AS number_of_tasks
+    FROM tasks t
+    INNER JOIN users u ON u.id = t.user_id
+    INNER JOIN labels l ON l.id = t.category_id
+    GROUP BY u.id, l.id
+)
+SELECT uts.username, uts.category, uts.number_of_tasks,
+       DENSE_RANK() OVER (PARTITION BY uts.username ORDER BY uts.number_of_tasks DESC) AS place
+FROM user_task_stats uts;
+SELECT username, category, number_of_tasks
+FROM temp
+WHERE place = 1;
+```
+
 ### Запросы с вложенными конструкциями:
 
 1. Получить список пользователей (users) и их задач (tasks), где каждая задача связана с меткой (label), у которой категория задачи равна "Category A":
