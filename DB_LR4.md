@@ -158,15 +158,37 @@ ORDER BY total_achievments DESC;
 
 ### Использование оконных функций с PARTITION и PARTITION OVER:
 
-3. Рассчитать сумму общей стоимости продуктов (price) для каждого пользователя (users) и показать эту сумму для каждого пользователя в контексте его категории (category) из таблицы меток (labels):
-
+3.Набор данных с каждой строкой, представленной как комбинация значений из столбцов:
+* users.username
+* labels.category
+* products.price
+Помимо этих основных столбцов, запрос также включает следующие вычисляемые столбцы:
+* total_category_price: Сумма цен продуктов в каждой категории.
+* total_category_count: Общее количество записей (строк) в каждой категории.
+* average_category_price: Средняя цена продуктов в каждой категории.
+* max_category_price: Максимальная цена продукта в каждой категории.
+* row_num_in_category: Номер строки в пределах каждой категории, упорядоченной по цене продукта.
+* global_rank: Глобальный ранг каждой строки в результате, упорядоченном по цене продукта:
 ```sql
-SELECT users.username, labels.category, products.price,
-       SUM(products.price) OVER (PARTITION BY labels.category) AS total_category_price
-FROM users
-LEFT JOIN l_products_users ON users.id = l_products_users.users_id
-LEFT JOIN products ON l_products_users.products_id = products.id
-LEFT JOIN labels ON products.title = labels.priority;
+SELECT 
+    users.username,
+    labels.category,
+    products.price,
+    SUM(products.price) OVER (PARTITION BY labels.category) AS total_category_price,
+    COUNT(*) OVER (PARTITION BY labels.category) AS total_category_count,
+    AVG(products.price) OVER (PARTITION BY labels.category) AS average_category_price,
+    MAX(products.price) OVER (PARTITION BY labels.category) AS max_category_price,
+    ROW_NUMBER() OVER (PARTITION BY labels.category ORDER BY products.price) AS row_num_in_category,
+    RANK() OVER (ORDER BY products.price) AS global_rank
+FROM 
+    users
+LEFT JOIN 
+    l_products_users ON users.id = l_products_users.users_id
+LEFT JOIN 
+    products ON l_products_users.products_id = products.id
+LEFT JOIN 
+    labels ON products.title = labels.priority;
+
 ```
 
 ### HAVING:
