@@ -254,7 +254,7 @@ WHERE EXISTS (SELECT 1 FROM tasks WHERE tasks.user_id = users.id);
 Создать новую таблицу "tasks_completed" и скопировать туда задачи (tasks), которые имеют прогресс (progress) более 50:
 
 ```sql
-CREATE TABLE tasks_completed AS
+INSERT INTO tasks_completed
 SELECT *
 FROM tasks
 WHERE progress > 50;
