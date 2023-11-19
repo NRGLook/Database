@@ -100,20 +100,42 @@ DELETE FROM public."users" WHERE id = 1;
    Этот триггер будет автоматически пересчитывать средний прогресс пользователя при добавлении, изменении или удалении задачи.
 
    ```sql
-   CREATE OR REPLACE FUNCTION update_user_average_progress() RETURNS TRIGGER AS $$
-   BEGIN
-       UPDATE users
-       SET average_progress = (SELECT AVG(progress) FROM tasks WHERE user_id = NEW.user_id)
-       WHERE id = NEW.user_id;
-       RETURN NEW;
-   END;
-   $$ LANGUAGE plpgsql;
-
-   CREATE TRIGGER update_average_progress
-   AFTER INSERT OR UPDATE OR DELETE ON tasks
-   FOR EACH ROW
-   EXECUTE FUNCTION update_user_average_progress();
+	-- Создание триггера
+	CREATE OR REPLACE FUNCTION public.update_average_progress()
+	    RETURNS trigger
+	    LANGUAGE 'plpgsql'
+	    COST 100
+	    VOLATILE NOT LEAKPROOF
+	AS $BODY$
+	BEGIN
+	    -- Обновление среднего прогресса пользователя
+	    UPDATE public."users"
+	    SET average_progress = (
+	        SELECT AVG(progress) FROM public."tasks" WHERE user_id = NEW.user_id
+	    )
+	    WHERE id = NEW.user_id;
+	
+	    -- Вывод сообщения в консоль о событии
+	    RAISE NOTICE 'Updated average progress for user ID %', NEW.user_id;
+	
+	    RETURN NULL;
+	END;
+	$BODY$;
+	
+	-- Привязка триггера к событию AFTER INSERT на таблице "tasks"
+	CREATE TRIGGER update_average_progress
+	AFTER INSERT ON public."tasks"
+	FOR EACH ROW
+	EXECUTE FUNCTION public.update_average_progress();
    ```
+
+Пример использования:
+
+```sql
+-- Вставка новой задачи для пользователя с ID = 1
+INSERT INTO public."tasks" (id, title, description, due_date, "check", progress, user_id, category_id)
+VALUES (1, 'New Task', 'Description', '2023-12-01', false, 25, 1, 1);
+```
 
 ### 4. **Триггер для автоматической проверки сроков задач:**
 
