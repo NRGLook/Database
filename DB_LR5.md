@@ -315,31 +315,50 @@ CALL get_user_tasks_procedure('example_user');
    Создайте процедуру, которая позволяет пользователям добавлять новые отзывы с указанием текста и даты.
 
    ```sql
-   CREATE OR REPLACE PROCEDURE create_new_review(
-       user_id bigint,
-       description character varying,
-       create_time date
-   ) AS $$
-   BEGIN
-       INSERT INTO public."reviews" (description, create_time, user_id)
-       VALUES (description, create_time, user_id);
-   END;
-   $$ LANGUAGE plpgsql;
+	CREATE OR REPLACE PROCEDURE add_review_procedure(
+	    p_id INT,
+	    p_user_id INT,
+	    p_description TEXT,
+	    p_create_time TIMESTAMP DEFAULT NULL
+	)
+	AS $$
+	BEGIN
+	    INSERT INTO reviews (id, user_id, description, create_time)
+	    VALUES (p_id, p_user_id, p_description, COALESCE(p_create_time, NOW()));
+	    RAISE NOTICE 'Review added for User ID: %', p_user_id;
+	END;
+	$$ LANGUAGE plpgsql;
    ```
+
+Пример использования:
+
+```sql
+CALL add_review_procedure(1, 123, 'Отличная работа!');
+```
 
 ### 5. **Процедура для обновления статуса задачи:**
 
-   Создайте процедуру, которая позволяет пользователю обновить статус задачи по ее идентификатору.
+   Создайте процедуру, которая позволяет пользователю обновить статус задачи по ее идентификатору и соответственно изменить прогресс задачи до 100, когда задача выполнена.
 
    ```sql
-   CREATE OR REPLACE PROCEDURE update_task_status(
-       task_id bigint,
-       new_status integer
-   ) AS $$
-   BEGIN
-       UPDATE public."tasks"
-       SET "check" = (new_status = 1)
-       WHERE id = task_id;
-   END;
-   $$ LANGUAGE plpgsql;
+	   CREATE OR REPLACE PROCEDURE update_task_status_procedure(
+	    p_task_id INT,
+	    p_check BOOLEAN
+	)
+	AS $$
+	BEGIN
+	    UPDATE tasks
+	    SET 
+	        check = p_check,
+	        progress = CASE WHEN p_check THEN 100 ELSE progress END
+	    WHERE id = p_task_id;
+	    RAISE NOTICE 'Status updated for Task ID: %', p_task_id;
+	END;
+	$$ LANGUAGE plpgsql;
    ```
+
+Пример использования:
+
+```sql
+CALL update_task_status_procedure(123, TRUE);
+```
