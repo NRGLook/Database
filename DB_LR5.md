@@ -195,46 +195,120 @@ WHERE id = 27;
    Создайте процедуру, которая позволяет администратору или модератору создать нового пользователя, указав имя пользователя, адрес электронной почты и пароль.
 
    ```sql
-   CREATE OR REPLACE PROCEDURE create_new_user(
-       username character varying,
-       email character varying,
-       password character varying
-   ) AS $$
-   BEGIN
-       INSERT INTO public."users" (username, email, password)
-       VALUES (username, email, password);
-   END;
-   $$ LANGUAGE plpgsql;
+	CREATE OR REPLACE PROCEDURE public.create_new_user(
+	    IN p_id INT,
+	    IN p_username CHARACTER VARYING,
+	    IN p_password CHARACTER VARYING,
+	    IN p_email CHARACTER VARYING,
+	    IN p_average_progress INT
+	)
+	LANGUAGE 'plpgsql'
+	AS $BODY$
+	DECLARE
+	    new_user_id INT;
+	BEGIN
+	    -- Вставка нового пользователя в таблицу "users"
+	    INSERT INTO public."users" (id, username, password, email, average_progress)
+	    VALUES (p_id, p_username, p_password, p_email, p_average_progress) RETURNING id INTO new_user_id;
+	
+	    -- Вывод сообщения в консоль о создании нового пользователя
+	    RAISE NOTICE 'New user created with ID %', new_user_id;
+	END;
+	$BODY$;
+	ALTER PROCEDURE public.create_new_user(
+	    INT, CHARACTER VARYING, CHARACTER VARYING, CHARACTER VARYING, INT
+	)
+	OWNER TO postgres;
    ```
+
+Пример использования:
+```sql
+CALL public.create_new_user(
+    17,
+    'DmitriyTihon',
+    'expensive123ABCD',
+    'dima@yandex.by',
+    100
+);
+```
 
 ### 2. **Процедура для добавления нового поста:**
 
    Создайте процедуру, которая позволяет пользователям добавить новый пост с указанием заголовка и описания.
 
    ```sql
-   CREATE OR REPLACE PROCEDURE create_new_post(
-       user_id bigint,
-       title character varying,
-       description character varying
-   ) AS $$
-   BEGIN
-       INSERT INTO public."posts" (title, description, user_id)
-       VALUES (title, description, user_id);
-   END;
-   $$ LANGUAGE plpgsql;
+	CREATE OR REPLACE PROCEDURE public.create_new_post(
+	    IN p_id INT,
+	    IN p_user_id INT,
+	    IN p_title CHARACTER VARYING(255),
+	    IN p_description TEXT
+	)
+	LANGUAGE 'plpgsql'
+	AS $BODY$
+	BEGIN
+	    -- Вставка нового поста в таблицу "posts" с указанным id
+	    INSERT INTO public."posts" (id, user_id, title, description)
+	    VALUES (p_id, p_user_id, p_title, p_description);
+	
+	    -- Вывод сообщения в консоль о создании нового поста
+	    RAISE NOTICE 'New post created with ID %', p_id;
+	END;
+	$BODY$;
+	ALTER PROCEDURE public.create_new_post(INT, INT, CHARACTER VARYING(255), TEXT)
+	OWNER TO postgres;
    ```
+
+Пример использования:
+```sql
+CALL public.create_new_post(
+    1,
+    2,
+    'Заголовок нового поста',
+    'Это описание нового поста. Привет, мир!'
+);
+```
 
 ### 3. **Процедура для получения списка задач для конкретного пользователя:**
 
-   Создайте процедуру, которая принимает идентификатор пользователя и возвращает список его задач.
+   Создайте процедуру, которая принимает имя пользователя и возвращает список его задач.
 
    ```sql
-   CREATE OR REPLACE PROCEDURE get_user_tasks(user_id bigint) AS $$
-   BEGIN
-       SELECT * FROM public."tasks" WHERE user_id = user_id;
-   END;
-   $$ LANGUAGE plpgsql;
+	CREATE OR REPLACE PROCEDURE get_user_tasks_procedure(p_username VARCHAR)
+	AS $$
+	DECLARE
+	    user_name VARCHAR;
+	    task_titles TEXT[];
+	BEGIN
+	    SELECT
+	        users.username,
+	        ARRAY_AGG(tasks.title)
+	    INTO
+	        user_name,
+	        task_titles
+	    FROM
+	        tasks
+	    JOIN users ON tasks.user_id = users.id
+	    WHERE users.username = p_username
+	    GROUP BY users.username;
+	
+	    -- Проверка наличия результатов
+	    IF FOUND THEN
+	        -- Ваш код для использования переменных user_name и task_titles
+	
+	        -- Например, вы можете вывести результаты
+	        RAISE NOTICE 'User Name: %, Task Titles: %', user_name, task_titles;
+	    ELSE
+	        RAISE NOTICE 'User with username % not found', p_username;
+	    END IF;
+	END;
+	$$ LANGUAGE plpgsql;
    ```
+
+Пример использования:
+
+```sql
+CALL get_user_tasks_procedure('example_user');
+```
 
 ### 4. **Процедура для добавления нового отзыва:**
 
