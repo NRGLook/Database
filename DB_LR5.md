@@ -139,23 +139,54 @@ VALUES (1, 'New Task', 'Description', '2023-12-01', false, 25, 1, 1);
 
 ### 4. **Триггер для автоматической проверки сроков задач:**
 
-   Этот триггер будет проверять сроки задач и обновлять статус задачи на "просрочено" при достижении срока выполнения.
-
+Этот триггер check_task_deadline предназначен для проверки просроченных задач. Вот его действия: 
+* При срабатывании триггера перед вставкой (BEFORE INSERT) в таблицу "tasks" он проверяет, просрочена ли задача.
+* Если дата завершения задачи (due_date) меньше текущей даты и времени (CURRENT_TIMESTAMP), то считается, что задача просрочена.
+* Для отслеживания просроченных задач используется поле is_overdue. Если задача просрочена, устанавливается флаг is_overdue в true.
+* В консоль выводится уведомление о просроченной задаче с указанием её ID.
+  
    ```sql
-   CREATE OR REPLACE FUNCTION check_task_due_date() RETURNS TRIGGER AS $$
-   BEGIN
-       IF NEW.due_date < NOW() THEN
-           UPDATE public."tasks" SET "check" = false WHERE id = NEW.id;
-       END IF;
-       RETURN NEW;
-   END;
-   $$ LANGUAGE plpgsql;
-
-   CREATE TRIGGER check_task_due_date
-   BEFORE INSERT OR UPDATE ON public."tasks"
-   FOR EACH ROW
-   EXECUTE FUNCTION check_task_due_date();
+	CREATE OR REPLACE FUNCTION public.check_task_deadline()
+	    RETURNS trigger
+	    LANGUAGE 'plpgsql'
+	    COST 100
+	    VOLATILE NOT LEAKPROOF
+	AS $BODY$
+	    BEGIN
+	        -- Проверка, если дата завершения задачи прошла
+	        IF NEW.due_date < CURRENT_TIMESTAMP THEN
+	            -- Добавление сообщения в консоль о просроченной задаче
+	            RAISE NOTICE 'Task with ID % has missed the deadline!', NEW.id;
+	
+	            -- Пример: Установка флага просроченной задачи
+	            NEW.is_overdue := true;
+	
+	            -- Пример: Отправка уведомления пользователю (замените этот код на свой код уведомления)
+	            INSERT INTO public.notifications (user_id, message)
+	            VALUES (NEW.user_id, 'Your task is overdue!');
+	
+	        END IF;
+	
+	        RETURN NEW;
+	    END;
+	$BODY$;
+	
+	ALTER FUNCTION public.check_task_deadline()
+	    OWNER TO postgres;
    ```
+
+Пример использования:
+
+```sql
+-- Вставляем задачу с просроченным сроком
+INSERT INTO public."tasks" (id, title, description, due_date, "check", progress, user_id, category_id)
+VALUES (27, 'Просроченная задача', 'Описание просроченной задачи', '2023-11-18 12:00:00', false, 0, 2, 1);
+
+-- Обновляем задачу с просроченным сроком
+UPDATE public."tasks"
+SET due_date = '2023-11-17 12:00:00'
+WHERE id = 27;
+```
 
 # 2.Процедуры:
 
