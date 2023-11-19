@@ -2,41 +2,97 @@
 
 ### 1. **Триггер для регистрации действий пользователей:**
 
-   Этот триггер будет записывать в журнал действий пользователя (user_actions_log) информацию о вставке, обновлении и удалении записей в таблицах "posts", "comments", "reviews" и других.
+   Выполняет логирование изменений в таблицах базы данных, выводя сообщение в консоль PostgreSQL и добавляя запись в таблицу log_table. 
 
    ```sql
-   CREATE OR REPLACE FUNCTION log_user_action() RETURNS TRIGGER AS $$
-   BEGIN
-       INSERT INTO user_actions_log (action_type, user_id, action_time)
-       VALUES (TG_OP, NEW.user_id, NOW());
-       RETURN NEW;
-   END;
-   $$ LANGUAGE plpgsql;
+CREATE OR REPLACE FUNCTION public.log_changes()
+    RETURNS trigger
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE NOT LEAKPROOF
+AS $BODY$
+BEGIN
+    -- Вывод сообщения в консоль о событии
+    RAISE NOTICE 'Table %, ID %, Change field % to %', 
+                 TG_TABLE_NAME, 
+                 NEW.id, 
+                 TG_OP, 
+                 ROW(NEW.*)::text;
 
-   CREATE TRIGGER log_user_actions
-   AFTER INSERT OR UPDATE OR DELETE ON posts
-   FOR EACH ROW
-   EXECUTE FUNCTION log_user_action();
+    -- Изменено: проверка наличия NEW.id перед вставкой
+    INSERT INTO public.log_table (table_name, action_type, record_id, change_time)
+    VALUES (
+        TG_TABLE_NAME,
+        TG_OP,
+        CASE 
+            WHEN TG_OP = 'DELETE' THEN OLD.id
+            ELSE NEW.id
+        END,
+        CURRENT_TIMESTAMP
+    );
+
+    RETURN NEW;
+	
+END;
+$BODY$;
    ```
+
+Пример использования:
+
+```sql
+-- Изменение столбца user_id в таблице "purchase_history" разрешать значение NULL
+ALTER TABLE public."purchase_history" ALTER COLUMN user_id DROP NOT NULL;
+
+-- Обновление записей в "purchase_history" перед удалением пользователя
+UPDATE public."purchase_history" SET user_id = NULL WHERE user_id = 1;
+
+-- Удаление пользователя
+DELETE FROM public."users" WHERE id = 1;
+```
 
 ### 2. **Триггер для автоматического обновления суммы покупок:**
 
-   Этот триггер будет автоматически обновлять поле "total_amount" в таблице "purchase_history" при вставке новых записей.
+   Этот триггер update_purchase_total предназначен для автоматического обновления данных в таблице purchase_history при вставке новых записей в таблицу l_products_users.  Триггер update_purchase_total автоматически поддерживает актуальные данные о покупках в таблице purchase_history для каждого пользователя в зависимости от вставленных данных в таблицу l_products_users:
 
    ```sql
-   CREATE OR REPLACE FUNCTION update_purchase_total() RETURNS TRIGGER AS $$
+   CREATE OR REPLACE FUNCTION public.update_purchase_total()
+       RETURNS trigger
+       LANGUAGE 'plpgsql'
+       COST 100
+       VOLATILE NOT LEAKPROOF
+   AS $BODY$
    BEGIN
-       UPDATE purchase_history
-       SET total_amount = total_amount + NEW.price
-       WHERE id = NEW.purchase_id;
+       -- Проверяем, существует ли запись с user_id в purchase_history
+       IF EXISTS (SELECT 1 FROM purchase_history WHERE user_id = NEW.users_id) THEN
+           -- Если запись существует, обновляем данные
+           UPDATE purchase_history
+           SET 
+               product_list = array_append(purchase_history.product_list, NEW.products_id::text),
+               total_amount = purchase_history.total_amount + (SELECT price FROM products WHERE id = NEW.products_id)
+           WHERE user_id = NEW.users_id;
+       ELSE
+           -- Если запись не существует, вставляем новую запись
+           INSERT INTO purchase_history (product_list, total_amount, user_id)
+           VALUES (
+               ARRAY[NEW.products_id::text],
+               (SELECT price FROM products WHERE id = NEW.products_id),
+               NEW.users_id
+           );
+       END IF;
+   
+       RAISE NOTICE 'Purchase amount updated for user ID %, added amount: %', NEW.users_id, (SELECT price FROM products WHERE id = NEW.products_id);
+   
        RETURN NEW;
    END;
-   $$ LANGUAGE plpgsql;
+   $BODY$;
+   
+   ALTER FUNCTION public.update_purchase_total()
+       OWNER TO postgres;
+   ```
 
-   CREATE TRIGGER update_purchase_total
-   AFTER INSERT ON l_products_users
-   FOR EACH ROW
-   EXECUTE FUNCTION update_purchase_total();
+   Пример использования:
+   ```sql
+   INSERT INTO l_products_users VALUES (1, 1, 2);
    ```
 
 ### 3. **Триггер для автоматического обновления среднего прогресса пользователя:**
