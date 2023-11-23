@@ -185,6 +185,13 @@ VALUES (1, 'New Task', 'Description', '2023-12-01', false, 25, 1, 1);
 	
 	ALTER FUNCTION public.check_task_deadline()
 	    OWNER TO postgres;
+
+
+CREATE OR REPLACE TRIGGER check_task_deadline_trigger
+AFTER INSERT OR UPDATE OR DELETE
+ON public.tasks
+FOR EACH ROW
+EXECUTE FUNCTION public.check_task_deadline();
    ```
 
 Пример использования:
