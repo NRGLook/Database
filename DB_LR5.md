@@ -18,7 +18,6 @@ BEGIN
                  NEW.id, 
                  TG_OP, 
                  ROW(NEW.*)::text;
-
     -- Изменено: проверка наличия NEW.id перед вставкой
     INSERT INTO public.log_table (table_name, action_type, record_id, change_time)
     VALUES (
@@ -30,11 +29,18 @@ BEGIN
         END,
         CURRENT_TIMESTAMP
     );
-
-    RETURN NEW;
-	
+    RETURN NEW;	
 END;
 $BODY$;
+
+
+-- Пример для одной таблицы (замените table_name на фактическое имя вашей таблицы)
+CREATE TRIGGER log_changes_trigger
+AFTER INSERT OR UPDATE OR DELETE
+ON public.comments
+FOR EACH ROW
+EXECUTE FUNCTION public.log_changes();
+
    ```
 
 Пример использования:
