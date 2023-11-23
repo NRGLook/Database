@@ -34,13 +34,11 @@ END;
 $BODY$;
 
 
--- Пример для одной таблицы (замените table_name на фактическое имя вашей таблицы)
 CREATE TRIGGER log_changes_trigger
 AFTER INSERT OR UPDATE OR DELETE
 ON public.comments
 FOR EACH ROW
 EXECUTE FUNCTION public.log_changes();
-
    ```
 
 Пример использования:
@@ -94,6 +92,14 @@ DELETE FROM public."users" WHERE id = 1;
    
    ALTER FUNCTION public.update_purchase_total()
        OWNER TO postgres;
+
+
+
+CREATE OR REPLACE TRIGGER update_purchase_total_trigger
+AFTER INSERT OR UPDATE OR DELETE
+ON public.l_products_users
+FOR EACH ROW
+EXECUTE FUNCTION public.update_purchase_total();
    ```
 
    Пример использования:
