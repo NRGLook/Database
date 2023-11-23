@@ -41,7 +41,7 @@ FOR EACH ROW
 EXECUTE FUNCTION public.log_changes();
    ```
 
-Пример использования:
+#### Пример использования:
 
 ```sql
 -- Изменение столбца user_id в таблице "purchase_history" разрешать значение NULL
@@ -102,10 +102,10 @@ FOR EACH ROW
 EXECUTE FUNCTION public.update_purchase_total();
    ```
 
-   Пример использования:
-   ```sql
-   INSERT INTO l_products_users VALUES (1, 1, 2);
-   ```
+#### Пример использования:
+```sql
+INSERT INTO l_products_users VALUES (1, 1, 2);
+```
 
 ### 3. **Триггер для автоматического обновления среднего прогресса пользователя:**
 
@@ -141,7 +141,7 @@ EXECUTE FUNCTION public.update_purchase_total();
 	EXECUTE FUNCTION public.update_average_progress();
    ```
 
-Пример использования:
+#### Пример использования:
 
 ```sql
 -- Вставка новой задачи для пользователя с ID = 1
@@ -156,8 +156,8 @@ VALUES (1, 'New Task', 'Description', '2023-12-01', false, 25, 1, 1);
 * Если дата завершения задачи (due_date) меньше текущей даты и времени (CURRENT_TIMESTAMP), то считается, что задача просрочена.
 * Для отслеживания просроченных задач используется поле is_overdue. Если задача просрочена, устанавливается флаг is_overdue в true.
 * В консоль выводится уведомление о просроченной задаче с указанием её ID.
-  
-   ```sql
+
+```sql
 	CREATE OR REPLACE FUNCTION public.check_task_deadline()
 	    RETURNS trigger
 	    LANGUAGE 'plpgsql'
@@ -187,24 +187,24 @@ VALUES (1, 'New Task', 'Description', '2023-12-01', false, 25, 1, 1);
 	    OWNER TO postgres;
 
 
-CREATE OR REPLACE TRIGGER check_task_deadline_trigger
-AFTER INSERT OR UPDATE OR DELETE
-ON public.tasks
-FOR EACH ROW
-EXECUTE FUNCTION public.check_task_deadline();
-   ```
+	CREATE OR REPLACE TRIGGER check_task_deadline_trigger
+	AFTER INSERT OR UPDATE OR DELETE
+	ON public.tasks
+	FOR EACH ROW
+	EXECUTE FUNCTION public.check_task_deadline();
+```
 
-Пример использования:
+#### Пример использования:
 
 ```sql
--- Вставляем задачу с просроченным сроком
-INSERT INTO public."tasks" (id, title, description, due_date, "check", progress, user_id, category_id)
-VALUES (27, 'Просроченная задача', 'Описание просроченной задачи', '2023-11-18 12:00:00', false, 0, 2, 1);
-
--- Обновляем задачу с просроченным сроком
-UPDATE public."tasks"
-SET due_date = '2023-11-17 12:00:00'
-WHERE id = 27;
+	-- Вставляем задачу с просроченным сроком
+	INSERT INTO public."tasks" (id, title, description, due_date, "check", progress, user_id, category_id)
+	VALUES (27, 'Просроченная задача', 'Описание просроченной задачи', '2023-11-18 12:00:00', false, 0, 2, 1);
+	
+	-- Обновляем задачу с просроченным сроком
+	UPDATE public."tasks"
+	SET due_date = '2023-11-17 12:00:00'
+	WHERE id = 27;
 ```
 
 # 2.Процедуры:
@@ -219,7 +219,7 @@ WHERE id = 27;
 	    IN p_username CHARACTER VARYING,
 	    IN p_password CHARACTER VARYING,
 	    IN p_email CHARACTER VARYING,
-	    IN p_average_progress INT
+	    IN p_average_progress NUMERIC
 	)
 	LANGUAGE 'plpgsql'
 	AS $BODY$
@@ -243,7 +243,6 @@ WHERE id = 27;
 Пример использования:
 ```sql
 CALL public.create_new_user(
-    17,
     'DmitriyTihon',
     'expensive123ABCD',
     'dima@yandex.by',
