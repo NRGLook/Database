@@ -76,12 +76,12 @@ DELETE FROM public."users" WHERE id = 1;
            WHERE user_id = NEW.users_id;
        ELSE
            -- Если запись не существует, вставляем новую запись
-           INSERT INTO purchase_history (product_list, total_amount, user_id)
-           VALUES (
-               ARRAY[NEW.products_id::text],
-               (SELECT price FROM products WHERE id = NEW.products_id),
-               NEW.users_id
-           );
+	INSERT INTO purchase_history (product_list, total_amount, user_id)
+	VALUES (
+	    ARRAY[NEW.products_id::text],
+	    (SELECT price FROM products WHERE id = NEW.products_id),
+	    NEW.users_id
+	);
        END IF;
    
        RAISE NOTICE 'Purchase amount updated for user ID %, added amount: %', NEW.users_id, (SELECT price FROM products WHERE id = NEW.products_id);
